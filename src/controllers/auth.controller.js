@@ -2,6 +2,7 @@ require("express-async-errors");
 const user = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const API_ERROR = require("../utils/errors");
+const Response = require("../utils/response");
 
 const login = async (req, res) => {
     console.log(req.body);
@@ -19,20 +20,14 @@ const register = async (req, res) => {
     req.body.password = await bcrypt.hash(req.body.password, 10);
     console.log("Hashed Password: ",req.body.password);
 
-    try {
-        const userSave = new user(req.body);
+    const userSave = new user(req.body);
 
-        await userSave.save().then((response) => {
-            return res.status(201).json({
-                success: true,
-                data: response
-            });
+    await userSave.save().then((data) => {
+        return new Response(data, "Registration Successfully Added!!").createdResponse(res);
         }).catch((err) => {
-            console.log(err);
+            throw new API_ERROR("Registration NOT Added!!", 400)
         })
-    } catch (err) {
-        console.log(err);
-    }
+
 }
 
 module.exports = {

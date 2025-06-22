@@ -17,8 +17,6 @@ app.use(express.urlencoded({
         parameterLimit: 50000
 }));
 
-
-
 app.use("/api", router);
 
 app.get("/", (req, res) => {
