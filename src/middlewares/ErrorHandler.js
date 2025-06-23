@@ -7,6 +7,7 @@ const ERROR_HANDLER_MIDDLEWARE = (err, req, res, next) => {
             message: err.message
         });
     }
+    console.log(err);
     return res.status(500).json({
         success: false,
         message: "we encountered an error please check the api!"
