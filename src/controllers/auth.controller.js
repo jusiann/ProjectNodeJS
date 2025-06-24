@@ -4,6 +4,9 @@ const bcrypt = require("bcrypt");
 const API_ERROR = require("../utils/errors");
 const Response = require("../utils/response");
 const {createToken} = require("../middlewares/auth");
+const crypto = require("crypto");
+const sendEmail = require("../utils/send.mail");
+const moment = require("moment");
 
 const login = async (req, res) => {
     const { email, password } = req.body;
@@ -45,8 +48,39 @@ const me = async (req, res) => {
     return new Response(req.user).successResponse(res);
 }
 
+const forgetPassword = async (req, res) => {
+    const {email} = req.body;
+
+    const userInfo = await USER.findOne({email}).select("name lastname email");
+
+    if(!userInfo)
+        return new API_ERROR("user not found!", 400);
+    console.log("user info: ",userInfo);
+
+    const resetCode = crypto.randomBytes(3).toString("hex");
+
+    await sendEmail({
+        from: "adilefe@outlook.com",
+        to: userInfo.email,
+        subject: "Reset Password",
+        text: `Reset Code: ${resetCode}`,
+    });
+
+    await USER.updateOne(
+        {email},
+        {
+            reset: {
+                code: resetCode,
+                time: moment(new Date()).add(15, "minutes").format("YYYY-MM-DD HH:mm:ss")
+            }
+        }
+    );
+    return new Response(true, "Check your email box!").successResponse(res);
+}
+
 module.exports = {
     login,
     register,
-    me
+    me,
+    forgetPassword
 }

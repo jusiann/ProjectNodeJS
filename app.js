@@ -1,7 +1,7 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 
-require("dotenv").config();
 require("./src/db/database");
 
 const port = process.env.PORT || 5001
@@ -12,6 +12,8 @@ const cors = require("cors");
 const CorsOptions = require("./src/helpers/CorsOptions");
 
 const mongoSanitize = require("express-mongo-sanitize");
+const path = require("path");
+const apiLimiter = require("./src/middlewares/rate.limit");
 
 // Middlewares
 app.use(express.json());
@@ -22,7 +24,11 @@ app.use(express.urlencoded({
         parameterLimit: 50000
 }));
 
+app.use(express.static(path.join(__dirname, "public")));
+app.use("/uploads", express.static(__dirname));
 app.use(cors(CorsOptions));
+
+app.use("/api", apiLimiter);
 
 app.use(mongoSanitize({
     replaceWith: "_"

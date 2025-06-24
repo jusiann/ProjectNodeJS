@@ -21,6 +21,16 @@ const USER_SCHEMA = new mongoose.Schema({
         type: String,
         required: true,
         trim: true
+    },
+    reset: {
+        code: {
+            type: String,
+            default: null,
+        },
+        time: {
+            type: Date,
+            default: null
+        }
     }
 }, {
     timestamps: true
