@@ -15,6 +15,9 @@ const mongoSanitize = require("express-mongo-sanitize");
 const path = require("path");
 const apiLimiter = require("./src/middlewares/rate.limit");
 
+const moment = require("moment-timezone");
+moment.tz.setDefault("Europe/Istanbul")
+
 // Middlewares
 app.use(express.json());
 app.use(express.json({limit: "50mb"}));

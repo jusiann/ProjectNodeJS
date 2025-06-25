@@ -46,7 +46,37 @@ const checkToken = async (req, res, next) => {
     })
 }
 
+const createTempToken = async (userID, email) => {
+    const payload = {
+        sub: userID,
+        email: email,
+    }
+
+    const token = await jwt.sign(payload, process.env.JWT_TEMPORARY_KEY, {
+        algorithm: "HS512",
+        expiresIn: process.env.JWT_TEMPORARY_EXPIRES_IN
+    })
+    return "Bearer " + token;
+}
+
+const decodedTempToken = async (tempToken) => {
+    const token = tempToken.split(" ")[1];
+    let userInfo;
+
+    await jwt.verify(token, process.env.JWT_TEMPORARY_KEY, async (error, decoded) => {
+        if(error)
+            throw new API_ERROR("Failed to verify token", 401);
+
+        userInfo = await USER.findById(decoded.sub).select("_id name lastname email");
+        if(!userInfo)
+            throw new API_ERROR("Failed to verify token", 401);
+    })
+    return userInfo;
+}
+
 module.exports = {
     createToken,
-    checkToken
+    checkToken,
+    createTempToken,
+    decodedTempToken
 };
